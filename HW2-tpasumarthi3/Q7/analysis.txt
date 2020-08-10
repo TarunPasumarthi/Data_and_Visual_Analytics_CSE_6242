@@ -1,0 +1,6 @@
+Python (matplotlib) vs Tableau vs D3
+1) Tableau is the simplest to develop as it mostly uses GUI elements. D3 is the hardest as it requires the most amount of code and knowledge. Python is in the middle as it requires coding but has simple intuitive features.
+2) D3 is the hardest to maintain as it seems to be the most susceptible to changes as the version updates. Python and Tableau are both easy to maintain as many of the functions and features are constant.
+3) Python has the lowest usability, as it does not have any interactive elements, D3 has the most usability as it is the most customizable and interactive. Tableau has interactive elements but is limited by the software features.
+4) D3 is most scalable as it’s asynchronous and runs on browsers. Python scales well but runs locally so it takes a while to process large amounts of data. Tableau may scale poorly if the data is large, complicated, or nested.
+5) Tableau requires licensing and software installation. Matplotlib in Python requires a python installation. D3 must be run on a browser with a compatible version and has few security requirements.

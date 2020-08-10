@@ -1,0 +1,6 @@
+i. rows:47
+ii. columns:5
+iii. ngram-fingerprint
+iv. grel:if(value==null,'Unbranded',value)
+v. grel:if(value>100,1,0)
+vi. grel:if(or(value.contains("discount"),value.contains("offer"),value.contains("sale")),1,0)

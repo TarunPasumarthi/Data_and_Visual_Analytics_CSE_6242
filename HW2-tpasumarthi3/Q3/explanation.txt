@@ -1,0 +1,1 @@
+Non-linear scales such as logarithmic or square root are useful when measuring the data with the respective scales. For instance is there is a significant disparity in the scale of measurement between two lines, using a logarithmic and square root scales can help visualizes the correlation and percentage changes  better.

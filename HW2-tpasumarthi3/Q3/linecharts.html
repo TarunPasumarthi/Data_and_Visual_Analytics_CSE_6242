@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style type="text/css">
+/* 13. Basic Styling with CSS */
+
+/* Style the lines by removing the fill and applying a stroke */
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+}
+  
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+  
+  .focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+    
+.pagebreak { page-break-before: always; }
+
+</style>
+<!-- Body tag is where we will append our SVG and SVG objects-->
+<body>
+    <div id = "vis1"></div>
+	<div class="pagebreak"> </div>
+	<div id = "vis2"></div>
+	<div class="pagebreak"> </div>
+	<div id = "vis3"></div>
+	<div class="pagebreak"> </div>
+	<div id = "vis4"></div>
+	<div class="pagebreak"> </div>
+</body>
+
+<!-- Load in the d3 library -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+    
+// The number of datapoints
+var n = 16;
+    
+var eq_data;
+d3.csv("earthquakes.csv").then(function(data) {
+  eq_data=data;
+  data.forEach(function(d) {
+    d.year= +d.year;
+    d['5_5.9']= +d['5_5.9'];
+    d['6_6.9']= +d['6_6.9'];
+    d['7_7.9']= +d['7_7.9'];
+    d['8.0+']= +d['8.0+'];
+    d['Estimated Deaths']= +d['Estimated Deaths']
+  })
+  setds();
+});
+
+// 8. An array of objects of length N. Each object has key -> value pair, the key being "y" and the value is a random number
+var dataset8 = []
+var dataset7 = []
+var dataset6 = []
+var dataset = []
+function setds(){
+  var i;
+  for (i=0;i<n;i++){
+    m8=eq_data[i]["8.0+"];
+    m7=eq_data[i]["7_7.9"];
+    m6=eq_data[i]["6_6.9"];
+    m5=eq_data[i]["5_5.9"];
+    dataset8.push({y:m8});
+    dataset7.push({y:m7});
+    dataset6.push({y:m6});
+    dataset.push({y:m5});
+  }
+  figure1();
+  figure2();
+  figure3();
+  figure4();
+}
+
+function figure1(){
+    // 2. Use the margin convention practice 
+    var margin = {top: 50, right: 50, bottom: 50, left: 50}
+      , width = window.innerWidth - margin.left - margin.right // Use the window's width 
+      , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+
+    // 5. X scale will use the index of our data
+    var xScale = d3.scaleTime()
+        .domain([new Date(d3.min(eq_data, function(d) { return d.year; }),0), new Date(d3.max(eq_data, function(d) { return d.year; }),0)]) // input
+        .range([0, width]); // output
+
+    // 6. Y scale will use the randomly generate number 
+    var yScale = d3.scaleLinear()
+        .domain([0, d3.max(eq_data, function(d) {
+        return Math.max(d['5_5.9'], d['6_6.9'],d['7_7.9'], d['8.0+']); })]) // input 
+        .range([height, 0]); // output
+    
+    // 7. d3's line generator
+    var line1 = d3.line()
+        .x(function(d,i) {return xScale(new Date(eq_data[i]["year"],0)); }) // set the x values for the line generator
+        .y(function(d) { return yScale(d.y); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    
+    // 1. Add the SVG to the page and employ #2
+    var svg = d3.select("#vis1").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // 3. Call the x axis in a group tag
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+    // 4. Call the y axis in a group tag
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", '#FFC300')
+        .attr("d", line1); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset6) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#FF5733")
+        .attr("d", line1); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset7) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#C70039")
+        .attr("d", line1); // 11. Calls the line generator 
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset8) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling 
+        .style("stroke", '#900C3F')
+        .attr("d", line1); // 11. Calls the line generator
+    
+    svg.append("text")
+        .attr("x", (width/2))
+        .attr("y", 0)
+        .attr("text-anchor", "middle")
+        .style("font-size", "25px")
+        .style("font", "sans-serif")
+        .text("Worldwide Occurances of Earthquarkes (2000-2015)");
+    
+    svg.append("text")
+      .attr("x", -height*1/3)
+      .attr("y", -margin.left*4/5)
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Number of Earthquakes");
+
+    svg.append("text")
+      .attr("x", width/2)
+      .attr("y", height + margin.top-5)
+      .attr("text-anchor", "end")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Year");
+    
+
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",40)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FFC300")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",60)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FF5733")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",80)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#C70039")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",100)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#900C3F")
+
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 50)
+        .text("5_5.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 70)
+        .text("6_6.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 90)
+        .text("7_7.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 110)
+        .text("8.0+")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+
+    
+}
+function figure2(){
+    // 2. Use the margin convention practice 
+    var margin = {top: 50, right: 50, bottom: 50, left: 50}
+      , width = window.innerWidth - margin.left - margin.right // Use the window's width 
+      , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+
+    // 5. X scale will use the index of our data
+    var xScale = d3.scaleTime()
+        .domain([new Date(d3.min(eq_data, function(d) { return d.year; }),0), new Date(d3.max(eq_data, function(d) { return d.year; }),0)]) // input
+        .range([0, width]); // output
+
+    // 6. Y scale will use the randomly generate number 
+    var yScale = d3.scaleLinear()
+        .domain([0, d3.max(eq_data, function(d) {
+        return Math.max(d['5_5.9'], d['6_6.9'],d['7_7.9'], d['8.0+']); })]) // input 
+        .range([height, 0]); // output
+    
+    // 7. d3's line generator
+    var line1 = d3.line()
+        .x(function(d,i) {return xScale(new Date(eq_data[i]["year"],0)); }) // set the x values for the line generator
+        .y(function(d) { return yScale(d.y); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    
+    // 1. Add the SVG to the page and employ #2
+    var svg = d3.select("#vis2").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // 3. Call the x axis in a group tag
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+    // 4. Call the y axis in a group tag
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", '#FFC300')
+        .attr("d", line1); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset6) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#FF5733")
+        .attr("d", line1); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset7) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#C70039")
+        .attr("d", line1); // 11. Calls the line generator 
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset8) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling 
+        .style("stroke", '#900C3F')
+        .attr("d", line1); // 11. Calls the line generator
+    
+    var max_death = d3.max(eq_data, function(d,i) { return eq_data[i]['Estimated Deaths']; })
+    var min_death = d3.min(eq_data, function(d,i) { return eq_data[i]['Estimated Deaths']; })
+
+    // 12. Appends a circle for each datapoint 
+    svg.selectAll(".dot")
+        .data(dataset)
+      .enter().append("circle") // Uses the enter().append() method
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#FFC300")
+      .exit().append("circle")
+        .data(dataset6)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#FF5733")
+      .exit().append("circle")
+        .data(dataset7)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#C70039")
+      .exit().append("circle")
+        .data(dataset8)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill", "#900C3F")
+      .exit().append("circle")
+    
+    
+    svg.append("text")
+    .attr("x", (width/2))
+    .attr("y", 0)
+    .attr("text-anchor", "middle")
+    .style("font-size", "25px")
+    .style("font", "sans-serif")
+    .text("Worldwide Earthquarke stats 2000-2015 with Symbols");
+    
+    svg.append("text")
+      .attr("x", -height*1/3)
+      .attr("y", -margin.left*4/5)
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Number of Earthquakes");
+
+    svg.append("text")
+      .attr("x", width/2)
+      .attr("y", height + margin.top-5)
+      .attr("text-anchor", "end")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Year");
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",40)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FFC300")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",60)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FF5733")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",80)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#C70039")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",100)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#900C3F")
+
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 50)
+        .text("5_5.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 70)
+        .text("6_6.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 90)
+        .text("7_7.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 110)
+        .text("8.0+")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+}
+function figure3(){
+    // 2. Use the margin convention practice 
+    var margin = {top: 50, right: 50, bottom: 50, left: 50}
+      , width = window.innerWidth - margin.left - margin.right // Use the window's width 
+      , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+
+    // 5. X scale will use the index of our data
+    var xScale = d3.scaleTime()
+        .domain([new Date(d3.min(eq_data, function(d) { return d.year; }),0), new Date(d3.max(eq_data, function(d) { return d.year; }),0)]) // input
+        .range([0, width]); // output
+
+    // 6. Y scale will use the randomly generate number 
+    var yScale = d3.scaleSqrt()
+        .domain([0, d3.max(eq_data, function(d) {
+        return Math.max(d['5_5.9'], d['6_6.9'],d['7_7.9'], d['8.0+']); })]) // input 
+        .range([height, 0]); // output
+    
+    // 7. d3's line generator
+    var line1 = d3.line()
+        .x(function(d,i) {return xScale(new Date(eq_data[i]["year"],0)); }) // set the x values for the line generator
+        .y(function(d) { return yScale(d.y); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    
+    // 1. Add the SVG to the page and employ #2
+    var svg = d3.select("#vis3").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // 3. Call the x axis in a group tag
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+    // 4. Call the y axis in a group tag
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", '#FFC300')
+        .attr("d", line1); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset6) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#FF5733")
+        .attr("d", line1); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset7) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#C70039")
+        .attr("d", line1); // 11. Calls the line generator 
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset8) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling 
+        .style("stroke", '#900C3F')
+        .attr("d", line1); // 11. Calls the line generator
+    
+    var max_death = d3.max(eq_data, function(d,i) { return eq_data[i]['Estimated Deaths']; })
+    var min_death = d3.min(eq_data, function(d,i) { return eq_data[i]['Estimated Deaths']; })
+
+    // 12. Appends a circle for each datapoint 
+    svg.selectAll(".dot")
+        .data(dataset)
+      .enter().append("circle") // Uses the enter().append() method
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#FFC300")
+      .exit().append("circle")
+        .data(dataset6)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#FF5733")
+      .exit().append("circle")
+        .data(dataset7)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#C70039")
+      .exit().append("circle")
+        .data(dataset8)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill", "#900C3F")
+      .exit().append("circle")
+    
+    
+    svg.append("text")
+    .attr("x", (width/2))
+    .attr("y", 0)
+    .attr("text-anchor", "middle")
+    .style("font-size", "25px")
+    .style("font", "sans-serif")
+    .text("Worldwide Earthquake stats 2000-2015 square root scale");
+    
+    svg.append("text")
+      .attr("x", -height*1/3)
+      .attr("y", -margin.left*4/5)
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Number of Earthquakes");
+
+    svg.append("text")
+      .attr("x", width/2)
+      .attr("y", height + margin.top-5)
+      .attr("text-anchor", "end")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Year");
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",40)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FFC300")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",60)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FF5733")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",80)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#C70039")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",100)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#900C3F")
+
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 50)
+        .text("5_5.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 70)
+        .text("6_6.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 90)
+        .text("7_7.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 110)
+        .text("8.0+")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+}
+function figure4(){
+    // 2. Use the margin convention practice 
+    var margin = {top: 50, right: 50, bottom: 50, left: 50}
+      , width = window.innerWidth - margin.left - margin.right // Use the window's width 
+      , height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+
+    // 5. X scale will use the index of our data
+    var xScale = d3.scaleTime()
+        .domain([new Date(d3.min(eq_data, function(d) { return d.year; }),0), new Date(d3.max(eq_data, function(d) { return d.year; }),0)]) // input
+        .range([0, width]); // output
+
+    // 6. Y scale will use the randomly generate number 
+    var yScale = d3.scaleLog()
+        .domain([1, d3.max(eq_data, function(d) { return Math.max(d['5_5.9'], d['6_6.9'],d['7_7.9'], d['8.0+']); })])
+        .range([height, 0]); // output
+    
+    // 7. d3's line generator
+    var line1 = d3.line()
+        .x(function(d,i) {return xScale(new Date(eq_data[i]["year"],0)); }) // set the x values for the line generator
+        .y(function(d,i) { return yScale(eq_data[i]['5_5.9']); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    // 7. d3's line generator
+    var line2 = d3.line()
+        .x(function(d,i) {return xScale(new Date(eq_data[i]["year"],0)); }) // set the x values for the line generator
+        .y(function(d,i) { return yScale(eq_data[i]['6_6.9']); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    // 7. d3's line generator
+    var line3 = d3.line()
+        .x(function(d,i) {return xScale(new Date(eq_data[i]["year"],0)); }) // set the x values for the line generator
+        .y(function(d,i) { return yScale(eq_data[i]['7_7.9']); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    // 7. d3's line generator
+    var line4 = d3.line()
+        .x(function(d,i) {return xScale(new Date(eq_data[i]["year"],0)); }) // set the x values for the line generator
+        .y(function(d,i) { return yScale(eq_data[i]['8.0+']==0?1:eq_data[i]['8.0+']); }) // set the y values for the line generator
+        .curve(d3.curveMonotoneX) // apply smoothing to the line
+    
+    // 1. Add the SVG to the page and employ #2
+    var svg = d3.select("#vis4").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // 3. Call the x axis in a group tag
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
+
+    // 4. Call the y axis in a group tag
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
+
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", '#FFC300')
+        .attr("d", line1); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset6) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#FF5733")
+        .attr("d", line2); // 11. Calls the line generator 
+    
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset7) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling
+        .style("stroke", "#C70039")
+        .attr("d", line3); // 11. Calls the line generator 
+    // 9. Append the path, bind the data, and call the line generator
+    svg.append("path")
+        .datum(dataset8) // 10. Binds data to the line 
+        .attr("class", "line") // Assign a class for styling 
+        .style("stroke", '#900C3F')
+        .attr("d", line4); // 11. Calls the line generator
+    
+    var max_death = d3.max(eq_data, function(d,i) { return eq_data[i]['Estimated Deaths']; })
+    var min_death = d3.min(eq_data, function(d,i) { return eq_data[i]['Estimated Deaths']; })
+
+    // 12. Appends a circle for each datapoint 
+    svg.selectAll(".dot")
+        .data(dataset)
+      .enter().append("circle") // Uses the enter().append() method
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#FFC300")
+      .exit().append("circle")
+        .data(dataset6)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#FF5733")
+      .exit().append("circle")
+        .data(dataset7)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d) { return yScale(d.y) })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill","#C70039")
+      .exit().append("circle")
+        .data(dataset8)
+      .enter().append("circle")
+        .attr("class", "dot") // Assign a class for styling
+        .attr("cx", function(d, i) { return xScale(new Date(eq_data[i]["year"],0))  })
+        .attr("cy", function(d,i) { return yScale(eq_data[i]['8.0+']==0?1:eq_data[i]['8.0+']);  })
+        .attr("r", function(d,i) { return 5+15*((eq_data[i]['Estimated Deaths']-min_death)/(max_death-min_death)) })
+        .style("fill", "#900C3F")
+      .exit().append("circle")
+    
+    
+    svg.append("text")
+    .attr("x", (width/2))
+    .attr("y", 0)
+    .attr("text-anchor", "middle")
+    .style("font-size", "25px")
+    .style("font", "sans-serif")
+    .text("Worldwide Earthquake stats 2000-2015 square root scale");
+    
+    svg.append("text")
+      .attr("x", -height*1/3)
+      .attr("y", -margin.left*4/5)
+      .attr("text-anchor", "end")
+      .attr("transform", "rotate(-90)")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Number of Earthquakes");
+
+    svg.append("text")
+      .attr("x", width/2)
+      .attr("y", height + margin.top-5)
+      .attr("text-anchor", "end")
+      .style("font-size", "15px")
+      .style("font", "sans-serif")
+      .text("Year");
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",50)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FFC300")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",70)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#FF5733")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",90)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#C70039")
+    
+    svg.append("rect")
+        .attr("x",width*(8/10))
+        .attr("y",110)
+        .attr("width", 25)
+        .attr("height", 17)
+        .style("fill", "#900C3F")
+
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 60)
+        .text("5_5.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 80)
+        .text("6_6.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 100)
+        .text("7_7.9")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+    
+    svg.append("text")
+        .attr("x", width*(8/10)+35)
+        .attr("y", 120)
+        .text("8.0+")
+        .style("font-size", "10px")
+        .attr("alignment-baseline","middle")
+}
+
+</script>

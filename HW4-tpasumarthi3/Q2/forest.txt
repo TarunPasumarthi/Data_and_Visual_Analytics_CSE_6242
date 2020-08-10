@@ -1,0 +1,3 @@
+1) The main reason to use random forests over decision trees is because random forests generalize better whereas decision trees can be susceptible to over-fitting. The bootstrap aggregating process in Random Forests reduces variance by combining the results of various models built by randomly sampled subsets of the original data.
+2) The entire random forest script runtime was: 88s
+3) I was able to obtain an accuracy of 97.52%

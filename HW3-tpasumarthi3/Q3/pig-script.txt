@@ -1,0 +1,8 @@
+reviews = LOAD 's3://amazon-reviews-pds/tsv/*' AS (marketplace:chararray,customer_id:chararray,review_id:chararray,product_id:chararray,product_parent:chararray,product_title:chararray,product_category:chararray,star_rating:int,helpful_votes:int,total_votes:int,vine:chararray,verified_purchase:chararray,review_headline:chararray,review_body:chararray, review_date:chararray);
+cleaned_revs = FOREACH reviews GENERATE total_votes, review_body, verified_purchase, star_rating, product_category, SIZE(review_body) AS body_size;
+filtered_revs = FILTER cleaned_revs BY (total_votes>=30) AND (verified_purchase=='Y') AND ( body_size>= 100);
+grouped_revs = GROUP filtered_revs BY product_category;
+cat_revs = FOREACH grouped_revs GENERATE $0 AS product_category, ((double) SUM(filtered_revs.star_rating))/COUNT(filtered_revs) AS AvgStarRate;
+cat_revs_ordered = ORDER cat_revs BY AvgStarRate DESC, product_category ASC;
+cat_final = LIMIT cat_revs_ordered 15;
+STORE cat_final INTO 's3://cse6242oan-2019fall-tpasumarthi3/output-big' USING PigStorage('\t');

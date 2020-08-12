@@ -1,4 +1,6 @@
 # Data and Visual Analytics CSE 6242 Georgia Tech Fall 2019
+##### <a href="https://poloclub.github.io/cse6242-2019fall-campus/"> Course Website </a>
+<br>
 
 #### Homework 1: Analyzing Rebrickable Lego data; SQLite; D3 Warmup; Gephi; OpenRefine
 ##### <a href="https://docs.google.com/document/d/e/2PACX-1vQnYxNVrapPgNRkVORtouoxDDzYyjwiWpLdV4puZp6oYEqkNGD8a2VdJsuemEWNBfNaIBrLyooCZIyz/pub?urp=gmail_link"> HW1 Assignment Description</a>
